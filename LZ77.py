@@ -2,18 +2,23 @@
 DICT_BUFFER_SIZE = 7
 LOOK_AHEAD_BUFFER_SIZE = 6
 
-def decode2TripletsFrom5Bytes(b):
-  tri1 = (
-    b[0],
-    (b[1] & 0xF0) >> 4,
-    (b[1] & 0x0F) << 4 | (b[2] & 0xF0) >> 4
+def decodeTripletFrom3Bytes(b, offsettedByHalfByte=False):
+  # print(b[1])
+  high = bytes([0xF0])
+  low = bytes([0x0F])
+  if(offsettedByHalfByte):
+    return (
+      (b[0] & low) << 4 | (b[1] & high) >> 4, 
+      b[1] & low, 
+      b[2]
+      )
+  else:
+    return (
+      b[0],
+      (b[1] & high) >> 4,
+      (b[1] & low) << 4 | (b[2] & high) >> 4
     )
-  tri2 = (
-    (b[2] & 0x0F) << 4 | (b[3] & 0xF0) >> 4, 
-    b[3] & 0x0F, 
-    b[4]
-    )
-  return [tri1,tri2]
+  
 
 def decodeFile(filepath, outputFilepath):
   inputfile = open(filepath,"rb")
@@ -21,14 +26,21 @@ def decodeFile(filepath, outputFilepath):
 
   triplets = []
   tmpstack = []
-  for byte in inputfile.read():
+  offsetted = False
+  byte = inputfile.read(1)
+  while(byte):
     tmpstack.append(byte)
-    if(len(tmpstack) == 5):
-      for t in decode2TripletsFrom5Bytes(tmpstack):
-        triplets.append(t)
+    if(len(tmpstack) == 3):
+      print(tmpstack)
+      triplets.append(decodeTripletFrom3Bytes(tmpstack), offsetted)
+      offsetted = not offsetted
+      inputfile.seek(-1,1) #cofnij sie o jeden bajt
       del tmpstack[:]
-  
-  outputfile.write(bytes(decode(triplets)))
+
+    byte = inputfile.read(1)
+    
+  bajty = bytes(decode(triplets))
+  outputfile.write(bajty)
 
   inputfile.close()
   outputfile.close()
