@@ -3,20 +3,17 @@ DICT_BUFFER_SIZE = 7
 LOOK_AHEAD_BUFFER_SIZE = 6
 
 def decodeTripletFrom3Bytes(b, offsettedByHalfByte=False):
-  # print(b[1])
-  high = bytes([0xF0])
-  low = bytes([0x0F])
   if(offsettedByHalfByte):
     return (
-      (b[0] & low) << 4 | (b[1] & high) >> 4, 
-      b[1] & low, 
+      (b[0] & 0x0F) << 4 | (b[1] & 0xF0) >> 4, 
+      b[1] & 0x0F, 
       b[2]
       )
   else:
     return (
       b[0],
-      (b[1] & high) >> 4,
-      (b[1] & low) << 4 | (b[2] & high) >> 4
+      (b[1] & 0xF0) >> 4,
+      (b[1] & 0x0F) << 4 | (b[2] & 0xF0) >> 4
     )
   
 
@@ -29,10 +26,10 @@ def decodeFile(filepath, outputFilepath):
   offsetted = False
   byte = inputfile.read(1)
   while(byte):
-    tmpstack.append(byte)
+    tmpstack.append(byte[0])
     if(len(tmpstack) == 3):
       print(tmpstack)
-      triplets.append(decodeTripletFrom3Bytes(tmpstack), offsetted)
+      triplets.append(decodeTripletFrom3Bytes(tmpstack, offsetted))
       offsetted = not offsetted
       inputfile.seek(-1,1) #cofnij sie o jeden bajt
       del tmpstack[:]
