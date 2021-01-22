@@ -30,8 +30,9 @@ def decodeFile(filepath, outputFilepath):
     if(len(tmpstack) == 3):
       print(tmpstack)
       triplets.append(decodeTripletFrom3Bytes(tmpstack, offsetted))
+      if(offsetted):
+        inputfile.seek(-1,1) #cofnij sie o jeden bajt
       offsetted = not offsetted
-      inputfile.seek(-1,1) #cofnij sie o jeden bajt
       del tmpstack[:]
 
     byte = inputfile.read(1)
