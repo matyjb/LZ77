@@ -2,15 +2,46 @@
 DICT_BUFFER_SIZE = 7
 LOOK_AHEAD_BUFFER_SIZE = 6
 
+def decode2TripletsFrom5Bytes(b):
+  tri1 = (
+    b[0],
+    (b[1] & 0xF0) >> 4,
+    (b[1] & 0x0F) << 4 | (b[2] & 0xF0) >> 4
+    )
+  tri2 = (
+    (b[2] & 0x0F) << 4 | (b[3] & 0xF0) >> 4, 
+    b[3] & 0x0F, 
+    b[4]
+    )
+  return [tri1,tri2]
+
+def decodeFile(filepath, outputFilepath):
+  inputfile = open(filepath,"rb")
+  outputfile = open(outputFilepath,"wb")
+
+  triplets = []
+  tmpstack = []
+  for byte in inputfile.read():
+    tmpstack.append(byte)
+    if(len(tmpstack) == 5):
+      for t in decode2TripletsFrom5Bytes(tmpstack):
+        triplets.append(t)
+      del tmpstack[:]
+  
+  outputfile.write(bytes(decode(triplets)))
+
+  inputfile.close()
+  outputfile.close()
+
 def encode2TripletsTo5Bytes(tri1, tri2):
-  byte0 = tri1[0] & 0xFF
+  return bytes([
+    tri1[0] & 0xFF,
+    (tri1[1] & 0x0F) << 4 | (tri1[2] & 0xF0) >> 4,
+    (tri1[2] & 0x0F) << 4 | (tri2[0] & 0xF0) >> 4,
+    (tri2[0] & 0x0F) << 4 | (tri2[1] & 0x0F),
+    tri2[2] & 0xFF
+  ])
 
-  byte1 = tri1[1] & 0x0F << 4 + tri1[2] & 0xF0 >> 4
-  byte2 = tri1[2] & 0x0F << 4 + tri2[0] & 0xF0 >> 4
-  byte3 = tri2[0] & 0x0F << 4 + tri2[1] & 0x0F
-
-  byte4 = tri2[2] & 0xFF
-  return bytes([byte0,byte1,byte2,byte3,byte4])
 
 def encodeFile(filepath, outputFilepath):
   inputfile = open(filepath,"rb")
@@ -31,7 +62,6 @@ def encodeFile(filepath, outputFilepath):
 
   inputfile.close()
   outputfile.close()
-
 
 #stream w postaci listy znakow (string)
 def encode(stream):
@@ -78,13 +108,18 @@ def decode(stream):
       del dict_buffer[0]
     
 def main():
-  text = "abracadabrarray"
-  print("######################", text)
-  d = list(decode(list(encode(text))))
-  print(text == ''.join(d))
+  # text = "abracadabrarray"
+  # t = [(6,12,2),(3,11,195)]
+  # e = encode2TripletsTo5Bytes(t[0],t[1])
+  # print([ee for ee in e])
+  # print(decode2TripletsFrom5Bytes(e))
+  # print("######################", text)
+  # d = list(decode(list(encode(text))))
+  # print(text == ''.join(d))
   for f in ["test.txt","test2.txt","test3.txt"]:
     print("######################", f)
     encodeFile(f,f+".lz77")
+    decodeFile(f+".lz77",f+".lz77.txt")
     pass
 
 
