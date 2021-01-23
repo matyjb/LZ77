@@ -73,7 +73,7 @@ def encode(stream):
     didbreak = False
     while(matching < LOOK_AHEAD_BUFFER_SIZE and index + matching < len(stream)):
       dict_start_index = 0 if index-DICT_BUFFER_SIZE < 0 else index-DICT_BUFFER_SIZE
-      v = stream.find(stream[index:index+matching+1],dict_start_index,index)
+      v = stream.rfind(stream[index:index+matching+1],dict_start_index,index)
       if(v == -1):
         yield (offset,matching,stream[index+matching])
         didbreak = True
@@ -83,6 +83,7 @@ def encode(stream):
         offset = index - v
 
     if(not didbreak):
+      triplets_count += 1
       yield (offset,matching,0)
 
     index += matching + 1
@@ -108,18 +109,10 @@ def decode(stream):
       del dict_buffer[0]
     
 def main():
-  # text = "abracadabrarray"
-  # t = [(6,12,2),(3,11,195)]
-  # e = encode2TripletsTo5Bytes(t[0],t[1])
-  # print([ee for ee in e])
-  # print(decode2TripletsFrom5Bytes(e))
-  # print("######################", text)
-  # d = list(decode(list(encode(text))))
-  # print(text == ''.join(d))
-  for f in ["test.txt","test2.txt","test3.txt"]:
+  for f in ["pantadeusz.txt", "icing.wav","piesel.jpg","ogromny.png"]:
     print("######################", f)
     encodeFile(f,f+".lz77")
-    decodeFile(f+".lz77",f+".lz77.txt")
+    decodeFile(f+".lz77",f+".lz77"+f[f.rfind("."):])
     pass
 
 
