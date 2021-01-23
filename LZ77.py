@@ -1,4 +1,5 @@
 from argparse import ArgumentParser
+import os
 
 # in bytes
 DICT_BUFFER_SIZE = 256
@@ -25,6 +26,7 @@ def decodeFile(filepath, outputFilepath):
   tmpstack = []
   for byte in inputfile.read():
     tmpstack.append(byte)
+    # gdy mamy już odczytanych 5 bajtów możemy je rozkodować
     if(len(tmpstack) == 5):
       for t in decode2TripletsFrom5Bytes(tmpstack):
         triplets.append(t)
@@ -84,8 +86,8 @@ def encode(stream):
         matching += 1
         offset = index - v
 
-    # slowo powtorzone jest tak dlugie jak LOOK_AHEAD_BUFFER_SIZE
-    # zmniejszamy to slowo o 1 by nie pobrać znaku z poza LOOK_AHEAD_BUFFER
+    # slowo powtorzone jest tak dlugie jak LOOK_AHEAD_BUFFER_SIZE lub doszło do końca pliku
+    # zmniejszamy to slowo o 1 by nie pobrać znaku z poza LOOK_AHEAD_BUFFER lub z poza pliku
     if(not didbreak):
       yield (offset,matching-1,stream[index+matching-1])
       index += matching
@@ -119,6 +121,7 @@ def main():
   parser.add_argument("output_path", nargs=1, help='Ścieżka do pliku wynikowego')
   parser.add_argument('-e', '--encode', action='store_true', help='kodowanie')
   parser.add_argument('-d', '--decode', action='store_true', help='dekodowanie')
+  parser.add_argument('--csv', action='store_true', help='wydrukuj statystyki w formacie przyjaznym csv')
   args = parser.parse_args()
   
   if not (args.encode or args.decode):
@@ -130,6 +133,15 @@ def main():
     encodeFile(args.input_path[0],args.output_path[0])
   if(args.decode):
     decodeFile(args.input_path[0],args.output_path[0])
+
+  size_in = os.stat(args.input_path[0]).st_size
+  size_out = os.stat(args.output_path[0]).st_size
+  if(args.csv):
+    print(args.input_path[0],args.output_path[0],size_in,size_out, sep=";")
+  else:
+    w = "Encoded:" if(args.encode) else "Decoded:"
+    print(w,args.input_path[0],"(",size_in,"B ) to",args.output_path[0],"(",size_out,"B )","\t","{:%}".format(size_out/size_in))
+
 
 if __name__ == "__main__":
     main()
