@@ -1,6 +1,8 @@
+from argparse import ArgumentParser
+
 # in bytes
-DICT_BUFFER_SIZE = 7
-LOOK_AHEAD_BUFFER_SIZE = 6
+DICT_BUFFER_SIZE = 256
+LOOK_AHEAD_BUFFER_SIZE = 15
 
 def decode2TripletsFrom5Bytes(b):
   tri1 = (
@@ -72,7 +74,7 @@ def encode(stream):
 
     didbreak = False
     while(matching < LOOK_AHEAD_BUFFER_SIZE and index + matching < len(stream)):
-      dict_start_index = 0 if index-DICT_BUFFER_SIZE < 0 else index-DICT_BUFFER_SIZE
+      dict_start_index = 0 if index-DICT_BUFFER_SIZE+1 < 0 else index-DICT_BUFFER_SIZE+1
       v = stream.rfind(stream[index:index+matching+1],dict_start_index,index)
       if(v == -1):
         yield (offset,matching,stream[index+matching])
@@ -83,7 +85,6 @@ def encode(stream):
         offset = index - v
 
     if(not didbreak):
-      triplets_count += 1
       yield (offset,matching,0)
 
     index += matching + 1
@@ -98,6 +99,7 @@ def decode(stream):
 
     index = len(dict_buffer)-offset
     for i in range(matching):
+      # print(index)
       dict_buffer.append(dict_buffer[index])
       yield dict_buffer[-1]
       if(len(dict_buffer) > DICT_BUFFER_SIZE):
@@ -109,12 +111,22 @@ def decode(stream):
       del dict_buffer[0]
     
 def main():
-  for f in ["pantadeusz.txt", "icing.wav","piesel.jpg","ogromny.png"]:
-    print("######################", f)
-    encodeFile(f,f+".lz77")
-    decodeFile(f+".lz77",f+".lz77"+f[f.rfind("."):])
-    pass
-
+  parser = ArgumentParser(description='Narzędzie do kodowania i dekodowania lz77')
+  parser.add_argument("input_path", nargs=1, help='Ścieżka do pliku wejsciowego')
+  parser.add_argument("output_path", nargs=1, help='Ścieżka do pliku wynikowego')
+  parser.add_argument('-e', '--encode', action='store_true', help='kodowanie')
+  parser.add_argument('-d', '--decode', action='store_true', help='dekodowanie')
+  args = parser.parse_args()
+  
+  if not (args.encode or args.decode):
+    parser.error("Nie wybrano typu akcji. Wybierz między --encode lub --decode")
+  if (args.encode and args.decode):
+    parser.error("Wybrano obydwie typ akcji. Wybierz między --encode lub --decode")
+  
+  if(args.encode):
+    encodeFile(args.input_path[0],args.output_path[0])
+  if(args.decode):
+    decodeFile(args.input_path[0],args.output_path[0])
 
 if __name__ == "__main__":
     main()
