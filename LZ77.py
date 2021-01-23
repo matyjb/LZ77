@@ -43,15 +43,19 @@ def decodeFile(filepath, outputFilepath):
   inputfile.close()
   outputfile.close()
 
-def encode2TripletsTo5Bytes(tri1, tri2):
-  return bytes([
-    tri1[0] & 0xFF,
-    (tri1[1] & 0x0F) << 4 | (tri1[2] & 0xF0) >> 4,
-    (tri1[2] & 0x0F) << 4 | (tri2[0] & 0xF0) >> 4,
-    (tri2[0] & 0x0F) << 4 | (tri2[1] & 0x0F),
-    tri2[2] & 0xFF
-  ])
-
+def encodeTripletTo3Bytes(tri, offsettedByHalfByte):
+  if(offsettedByHalfByte):
+    return bytes([
+      (tri[0] & 0xF0) >> 4,
+      (tri[0] & 0x0F) << 4 | (tri[1] & 0x0F),
+      tri[2] & 0xFF
+    ])
+  else:
+    return bytes([
+      tri[0] & 0xFF,
+      (tri[1] & 0x0F) << 4 | (tri[2] & 0xF0) >> 4,
+      (tri[2] & 0x0F) << 4,
+    ])
 
 def encodeFile(filepath, outputFilepath):
   inputfile = open(filepath,"rb")
@@ -59,16 +63,19 @@ def encodeFile(filepath, outputFilepath):
 
   tmpstack = []
   for triplet in encode(inputfile.read()):
+    print(triplet)
     tmpstack.append(triplet)
     if(len(tmpstack) == 2):
       # can be saved
-      outputfile.write(encode2TripletsTo5Bytes(tmpstack[0],tmpstack[1]))
-      del tmpstack[0]
-      del tmpstack[0]
+      tri0 = encodeTripletTo3Bytes(tmpstack[0],False)
+      tri1 = encodeTripletTo3Bytes(tmpstack[1],True)
+      twotripletsbytes = bytes([tri0[0],tri0[1],tri0[2]+tri1[0],tri1[1],tri1[2]])
+      outputfile.write(twotripletsbytes)
+      del tmpstack[:]
     
   # spr czy w stacku cos nie zostalo
   if(len(tmpstack) != 0):
-    outputfile.write(encode2TripletsTo5Bytes(tmpstack[0],(0,0,0)))
+    outputfile.write(encodeTripletTo3Bytes(tmpstack[0], False))
 
   inputfile.close()
   outputfile.close()
@@ -126,7 +133,7 @@ def main():
   # print("######################", text)
   # d = list(decode(list(encode(text))))
   # print(text == ''.join(d))
-  for f in ["test.txt","test2.txt","test3.txt"]:
+  for f in ["test.txt"]:
     print("######################", f)
     encodeFile(f,f+".lz77")
     decodeFile(f+".lz77",f+".lz77.txt")
