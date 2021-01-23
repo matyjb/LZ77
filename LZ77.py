@@ -84,10 +84,13 @@ def encode(stream):
         matching += 1
         offset = index - v
 
+    # slowo powtorzone jest tak dlugie jak LOOK_AHEAD_BUFFER_SIZE
+    # zmniejszamy to slowo o 1 by nie pobrać znaku z poza LOOK_AHEAD_BUFFER
     if(not didbreak):
-      yield (offset,matching,0)
-
-    index += matching + 1
+      yield (offset,matching-1,stream[index+matching-1])
+      index += matching
+    else:
+      index += matching + 1
 
 #przyjmuje liste krotek postaci (offset, characters_matching, character_not_matched)
 def decode(stream):
