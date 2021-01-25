@@ -127,7 +127,7 @@ def main():
   if not (args.encode or args.decode):
     parser.error("Nie wybrano typu akcji. Wybierz między --encode lub --decode")
   if (args.encode and args.decode):
-    parser.error("Wybrano obydwie typ akcji. Wybierz między --encode lub --decode")
+    parser.error("Wybrano obydwa typy akcji. Wybierz między --encode lub --decode")
   
   if(args.encode):
     encodeFile(args.input_path[0],args.output_path[0])
@@ -136,11 +136,14 @@ def main():
 
   size_in = os.stat(args.input_path[0]).st_size
   size_out = os.stat(args.output_path[0]).st_size
+  cr = size_in / size_out
+  cp = 1-(1/cr)
+  br = 1/ cr * 8
   if(args.csv):
-    print(args.input_path[0],args.output_path[0],size_in,size_out, sep=";")
+    print(args.input_path[0],args.output_path[0],size_in,size_out,cr,cp,br, sep=";")
   else:
     w = "Encoded:" if(args.encode) else "Decoded:"
-    print(w,args.input_path[0],"(",size_in,"B ) to",args.output_path[0],"(",size_out,"B )","\t","{:%}".format(size_out/size_in))
+    print(w,args.input_path[0],"(",size_in,"B ) to",args.output_path[0],"(",size_out,"B )","\t","CR = {:.3f}".format(cr),"CP = {:.3%}".format(cp),"BR = {:.3f}".format(br))
 
 
 if __name__ == "__main__":
