@@ -116,22 +116,16 @@ def decode(stream):
       del dict_buffer[0]
     
 def main():
-  parser = ArgumentParser(description='Tool for lz77 encoding and decoding')
+  parser = ArgumentParser(description='Tool for lz77 encoding and decoding. By default tool decodes.')
   parser.add_argument("input_path", nargs=1, help='Path to input file')
   parser.add_argument("output_path", nargs=1, help='Path to output file (created if doesn\'t exist)')
-  parser.add_argument('-e', '--encode', action='store_true', help='encode input file')
-  parser.add_argument('-d', '--decode', action='store_true', help='decode input file')
+  parser.add_argument('-e', '--encode', action='store_true', help='Encode input file')
   parser.add_argument('--csv', action='store_true', help='Print statistics in csv format')
   args = parser.parse_args()
   
-  if not (args.encode or args.decode):
-    parser.error("Action type not selected. Choose between --encode or --decode")
-  if (args.encode and args.decode):
-    parser.error("Both types of actions are selected. Choose between --encode or --decode")
-  
   if(args.encode):
     encodeFile(args.input_path[0],args.output_path[0])
-  if(args.decode):
+  else:
     decodeFile(args.input_path[0],args.output_path[0])
 
   size_in = os.stat(args.input_path[0]).st_size
