@@ -116,18 +116,18 @@ def decode(stream):
       del dict_buffer[0]
     
 def main():
-  parser = ArgumentParser(description='Narzędzie do kodowania i dekodowania lz77')
-  parser.add_argument("input_path", nargs=1, help='Ścieżka do pliku wejsciowego')
-  parser.add_argument("output_path", nargs=1, help='Ścieżka do pliku wynikowego')
-  parser.add_argument('-e', '--encode', action='store_true', help='kodowanie')
-  parser.add_argument('-d', '--decode', action='store_true', help='dekodowanie')
-  parser.add_argument('--csv', action='store_true', help='wydrukuj statystyki w formacie przyjaznym csv')
+  parser = ArgumentParser(description='Tool for lz77 encoding and decoding')
+  parser.add_argument("input_path", nargs=1, help='Path to input file')
+  parser.add_argument("output_path", nargs=1, help='Path to output file (created if doesn\'t exist)')
+  parser.add_argument('-e', '--encode', action='store_true', help='encode input file')
+  parser.add_argument('-d', '--decode', action='store_true', help='decode input file')
+  parser.add_argument('--csv', action='store_true', help='Print statistics in csv format')
   args = parser.parse_args()
   
   if not (args.encode or args.decode):
-    parser.error("Nie wybrano typu akcji. Wybierz między --encode lub --decode")
+    parser.error("Action type not selected. Choose between --encode or --decode")
   if (args.encode and args.decode):
-    parser.error("Wybrano obydwa typy akcji. Wybierz między --encode lub --decode")
+    parser.error("Both types of actions are selected. Choose between --encode or --decode")
   
   if(args.encode):
     encodeFile(args.input_path[0],args.output_path[0])
