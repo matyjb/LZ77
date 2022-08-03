@@ -1,13 +1,16 @@
-usage: lz77.py [-h] [-e] [-d] [--csv] input_path output_path
+# LZ77 encoder and decoder. 
+By default tool decodes.
 
-Narzędzie do kodowania i dekodowania lz77
+Usage: 
+```
+$ python LZ77.py [-h] [-e] [--csv] <input_path> <output_path>
+```
 
-positional arguments:
-  input_path    ścieżka do pliku wejsciowego
-  output_path   ścieżka do pliku wynikowego
+#### positional arguments:
+- `input_path`    path to input file
+- `output_path`   path to output file (created if doesn't exist)
 
-optional arguments:
-  -h, --help    show this help message and exit
-  -e, --encode  kodowanie
-  -d, --decode  dekodowanie
-  --csv         wydrukuj statystyki w formacie przyjaznym csv
+#### options:
+- `-h` or `--help`    show this help message and exit
+- `-e` or `--encode`  encode input file
+- `--csv`         print statistics in csv format

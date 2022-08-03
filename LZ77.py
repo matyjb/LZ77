@@ -117,10 +117,10 @@ def decode(stream):
     
 def main():
   parser = ArgumentParser(description='Tool for lz77 encoding and decoding. By default tool decodes.')
-  parser.add_argument("input_path", nargs=1, help='Path to input file')
-  parser.add_argument("output_path", nargs=1, help='Path to output file (created if doesn\'t exist)')
-  parser.add_argument('-e', '--encode', action='store_true', help='Encode input file')
-  parser.add_argument('--csv', action='store_true', help='Print statistics in csv format')
+  parser.add_argument("input_path", nargs=1, help='path to input file')
+  parser.add_argument("output_path", nargs=1, help='path to output file (created if doesn\'t exist)')
+  parser.add_argument('-e', '--encode', action='store_true', help='encode input file')
+  parser.add_argument('--csv', action='store_true', help='print statistics in csv format')
   args = parser.parse_args()
   
   if(args.encode):
